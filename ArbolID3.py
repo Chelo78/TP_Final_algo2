@@ -139,7 +139,8 @@ class ArbolID3:
 
 if __name__ == "__main__":
     #https://www.kaggle.com/datasets/thedevastator/cancer-patients-and-air-pollution-a-new-link
-    df = pd.read_csv("G:/algo2/TP_Final/cancer_patients.csv", index_col=0)
+    #df = pd.read_csv("G:/algo2/TP_Final/cancer_patients.csv", index_col=0)
+    df = pd.read_csv("C:/Documentos/n67745/Repositorios GitHub/UNSAM/TP Algoritmos 2/TP_Final_algo2/cancer_patients.csv", index_col=0)
     df = df.drop("Patient Id", axis = 1)
     bins = [0, 15, 20, 30, 40, 50, 60, 70, float('inf')]
     labels = ['0-15', '15-20', '20-30', '30-40', '40-50', '50-60', '60-70', '70+']
