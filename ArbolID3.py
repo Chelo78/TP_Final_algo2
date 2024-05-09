@@ -57,6 +57,7 @@ class ArbolID3:
         return mejor_atributo
 
     def fit(self) -> None:
+        print('1\n',)
         if len(self.raiz.target.unique()) == 1 or len(self.raiz.data.columns) == 0:
             self.raiz.clase = self.raiz.target.value_counts().idxmax()
         else:
@@ -140,12 +141,20 @@ class ArbolID3:
 if __name__ == "__main__":
     #https://www.kaggle.com/datasets/thedevastator/cancer-patients-and-air-pollution-a-new-link
     #df = pd.read_csv("G:/algo2/TP_Final/cancer_patients.csv", index_col=0)
+    
     df = pd.read_csv("C:/Documentos/n67745/Repositorios GitHub/UNSAM/TP Algoritmos 2/TP_Final_algo2/cancer_patients.csv", index_col=0)
     df = df.drop("Patient Id", axis = 1)
     bins = [0, 15, 20, 30, 40, 50, 60, 70, float('inf')]
     labels = ['0-15', '15-20', '20-30', '30-40', '40-50', '50-60', '60-70', '70+']
     df['Age'] = pd.cut(df['Age'], bins=bins, labels=labels, right=False)
 
+    df = df.drop('Snoring', axis=1)
+    df = df.drop('Dry Cough', axis=1)
+    df = df.drop('Frequent Cold', axis=1)
+    df = df.drop('Clubbing of Finger Nails', axis=1)
+    df = df.drop('Swallowing Difficulty', axis=1)
+    df = df.drop('Wheezing', axis=1)
+    
     X = df.drop('Level', axis=1)
     y = df['Level']
 
