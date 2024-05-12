@@ -120,15 +120,32 @@ class ArbolDecision:
             values.append(value)
         return values
 
-    def fit(self, X: pd.DataFrame, y: pd.Series):
+    def _total_samples(self):
+        return len(self.raiz.data)
+
+    def fit(self, X: pd.DataFrame, y: pd.Series, max_prof: int = -1, min_obs_nodo: int = -1):
         self.raiz = NodoID3(X,y)
-        def _fit_id3(arbol):
+
+        def _fit_id3(arbol, prof_acum: int = 0):
             arbol.target_categorias = y.unique()
-            if not (len(arbol.raiz.target.unique()) == 1 or len(arbol.raiz.data.columns) == 0):
+            
+            if prof_acum == 0:
+                prof_acum = 1
+                
+            #Condicion de split
+            #   - Unico valor para target (nodo puro)
+            #   - No hay mas atributos
+            #   - max_profundida
+            
+            if not ( len(arbol.raiz.target.unique()) == 1 or len(arbol.raiz.data.columns) == 0 
+                    or (max_prof != -1 and max_prof <= prof_acum) 
+                    or (min_obs_nodo != -1 and min_obs_nodo > arbol._total_samples() ) ):
+                
                 mejor_atributo = arbol.raiz._mejor_split()
                 arbol.raiz._split(mejor_atributo)
                 for sub_arbol in arbol.raiz.subs:
-                    _fit_id3(sub_arbol)
+                    _fit_id3(sub_arbol, prof_acum+1)
+
         if self.type == "ID3":
             _fit_id3(self)
         elif self.type == "C45":
@@ -165,7 +182,7 @@ class ArbolDecision:
         split = "Split: " + str(nodo.atributo)
         rta = "Valor: " + str(nodo.categoria)
         entropia = f"Entropia: {round(self.raiz.entropia(), 2)}"
-        samples = f"Samples: {len(self.raiz.data)}"
+        samples = f"Samples: {str (self._total_samples())}"
         values = f"Values: {str(self._values())}"
         clase = 'Clase:' + str(nodo.clase)
         if nodo.es_raiz():
@@ -216,7 +233,7 @@ def probar(df, target:str):
     y = df[target]
     x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     arbol = ArbolDecision("ID3")
-    arbol.fit(x_train, y_train)
+    arbol.fit(x_train, y_train, min_obs_nodo=120)
     arbol.imprimir()
     y_pred = arbol.predict(x_test)
     print(f"accuracy: {accuracy_score(y_test.tolist(), y_pred)}")
@@ -226,13 +243,13 @@ def probar(df, target:str):
 
 if __name__ == "__main__":
     #https://www.kaggle.com/datasets/thedevastator/cancer-patients-and-air-pollution-a-new-link
-    patients = pd.read_csv("TP_Final_algo2/TP_Final/cancer_patients.csv", index_col=0)
+    patients = pd.read_csv("cancer_patients.csv", index_col=0)
     patients = patients.drop("Patient Id", axis = 1)
     bins = [0, 15, 20, 30, 40, 50, 60, 70, float('inf')]
     labels = ['0-15', '15-20', '20-30', '30-40', '40-50', '50-60', '60-70', '70+']
     patients['Age'] = pd.cut(patients['Age'], bins=bins, labels=labels, right=False)
 
-    tennis = pd.read_csv("TP_Final_algo2/TP_Final/PlayTennis.csv", index_col=0)
+    tennis = pd.read_csv("PlayTennis.csv", index_col=0)
 
     print("Pruebo con patients\n")
     probar(patients, "Level")
